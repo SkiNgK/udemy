@@ -89,7 +89,6 @@ class formCadastro extends Component{
 
 //mapear estados vindo do reducer
 const mapStateToProps = state => {
-    console.log(state)
     return(
         {
             nome: state.AutenticacaoReducer.nome,
