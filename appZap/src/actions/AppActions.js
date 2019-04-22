@@ -6,7 +6,9 @@ import {
     MODIFICA_ADICIONA_CONTATO_EMAIL,
     ADICIONA_CONTATO_ERRO,
     ADICIONA_CONTATO_SUCESSO,
-    LISTA_CONTATO_USUARIO
+    LISTA_CONTATO_USUARIO,
+    MODIFICA_MENSAGEM,
+    ENVIA_MENSAGEM
  } from './types';
 
 
@@ -93,6 +95,51 @@ export const contatosUsuarioFetch = () => {
                     type: LISTA_CONTATO_USUARIO, payload: snapshot.val() 
                 }
             )
+        })
+    }
+}
+
+export const modificaMensagem = texto => (
+    {
+        type: MODIFICA_MENSAGEM,
+        payload: texto
+    }
+)
+
+export const enviaMensagem = (mensagem, cantatoNome, contatoEmail) => {
+    //dados do usuario
+    const { currentUser } = firebase.auth() //recupera dados do ussuario no firebase
+    const usuarioEmail = currentUser.email;
+
+    return(dispatch) => {
+
+        //conversão para base 64
+        const usuarioEmailB64 = b64.encode(usuarioEmail)
+        const contatoEmailB64 = b64.encode(contatoEmail)
+
+        //logica para registro de mensagens enviadas e recebidas 
+        firebase.database().ref(`/mensagens/${usuarioEmailB64}/${contatoEmailB64}`)
+        .push({ mensagem, tipo: 'envio'})
+        .then(() => {
+            firebase.database().ref(`/mensagens/${contatoEmailB64}/${usuarioEmailB64}`)
+            .push({ mensagem, tipo: 'recebido'})
+            .then(() => dispatch({type: ENVIA_MENSAGEM}))
+        })
+        .then(() => {
+            //armazenar o cabeçalho de conversa do usuário autenticado
+            firebase.database().ref(`/usuario_conversas/${usuarioEmailB64}/${contatoEmailB64}`)
+            .set({ nome: cantatoNome, email: contatoEmail })
+        })
+        .then(() => {
+            //armazenar o cabeçalho de conversa do contato
+            firebase.database().ref(`/contatos/${usuarioEmailB64}`)
+            .once("value")
+            .then( snapshot => {
+                const dadosUsuario = _.first(_.values(snapshot.val()))
+                firebase.database().ref(`/usuario_conversas/${contatoEmailB64}/${usuarioEmailB64}`)
+                .set({ nome: dadosUsuario.nome, email: usuarioEmail })
+            })
+            
         })
     }
 }

@@ -6,6 +6,7 @@ import FormCadastro from './components/FormCadastro';
 import TelaInicial from './components/TelaInicial';
 import Principal from './components/Principal';
 import AdicionarContatos from './components/AdicionarContatos'
+import Conversa from './components/Conversa'
 
 export default props => (
     <Router navigationBarStyle={{ backgroundColor: '#115E54' }} titleStyle={{ color: '#fff'}}>
@@ -14,5 +15,6 @@ export default props => (
         <Scene key='formCadastro' component={FormCadastro} title="Cadastro" hideNavBar={false}/>
         <Scene key='principal' component={Principal} title="Tela principal" hideNavBar={true}/>
         <Scene key='adicionarContatos' component={AdicionarContatos} title="Adicionar Contatos" hideNavBar={false}/>
+        <Scene key='conversa' component={Conversa} title="Conversa" hideNavBar={false}/>
     </Router>
 );
