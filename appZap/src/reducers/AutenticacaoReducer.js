@@ -6,7 +6,8 @@ import {
     CADASTRO_USUARIO_ERRO,
     LOGIN_USUARIO_ERRO,
     LOGIN_EM_ANDAMENTO,
-    CADASTRO_EM_ANDAMENTO
+    CADASTRO_EM_ANDAMENTO,
+    LOGIN_USUARIO_SUCESSO
 } from '../actions/types'
 
 const INITIAL_STATE = {
@@ -38,6 +39,8 @@ export default (state = INITIAL_STATE, action) => {
             return { ...state, loadingLogin: true }
         case CADASTRO_EM_ANDAMENTO:
             return { ...state, loadingCadastro: true }
+        case LOGIN_USUARIO_SUCESSO:
+            return { ...state, ...INITIAL_STATE }
         default:
             break;
     }
