@@ -8,7 +8,10 @@ import {
     ADICIONA_CONTATO_SUCESSO,
     LISTA_CONTATO_USUARIO,
     MODIFICA_MENSAGEM,
-    ENVIA_MENSAGEM
+    ENVIA_MENSAGEM,
+    LISTA_CONVERSA_USUARIO,
+    LIMPA_MENSAGEM,
+    LISTA_CONVERSAS_USUARIO
  } from './types';
 
 
@@ -33,7 +36,6 @@ export const adicionaContato = email => {
             if (snapshot.val()) {
                 //_.values converte o objeto e um array para conseguir obter o nome do usuário
                 const dadosUsuario = _.first(_.values(snapshot.val()));
-                console.log(dadosUsuario)
 
                 //pegando o email e convertendo para a base 64 por conta do caractere especial @
                 const { currentUser } = firebase.auth();
@@ -88,11 +90,32 @@ export const contatosUsuarioFetch = () => {
         let emailUsuarioB64 = b64.encode( currentUser.email );
         firebase.database().ref(`/usuario_contato/${emailUsuarioB64}`)
         .on('value', snapshot => {
-            // console.log(emailUsuarioB64)
-            // console.log(snapshot.val())
             dispatch(
                 {
-                    type: LISTA_CONTATO_USUARIO, payload: snapshot.val() 
+                    type: LISTA_CONTATO_USUARIO, 
+                    payload: snapshot.val() 
+                }
+            )
+        })
+    }
+}
+
+export const conversaUsuarioFetch = contatoEmail => {
+
+    //precisa dos dois para encontrar as mensagens trocadas
+    const { currentUser } = firebase.auth()
+    let usuarioEmailB64 = b64.encode( currentUser.email );
+    let contatoEmailB64 = b64.encode( contatoEmail );
+
+    return dispatch => {
+        //sempre que houver uma alteração no valor desse path no firebase uma action sera ativada
+        //nesse caso sera passado atravez dessa action o valor alterado no firebase
+        firebase.database().ref(`/mensagens/${usuarioEmailB64}/${contatoEmailB64}`)
+        .on('value', snapshot => {
+            dispatch(
+                {
+                    type: LISTA_CONVERSA_USUARIO,
+                    payload: snapshot.val()
                 }
             )
         })
@@ -103,6 +126,12 @@ export const modificaMensagem = texto => (
     {
         type: MODIFICA_MENSAGEM,
         payload: texto
+    }
+)
+
+export const limpaMensagem = () => (
+    {
+        type: LIMPA_MENSAGEM
     }
 )
 
@@ -140,6 +169,22 @@ export const enviaMensagem = (mensagem, cantatoNome, contatoEmail) => {
                 .set({ nome: dadosUsuario.nome, email: usuarioEmail })
             })
             
+        })
+    }
+}
+
+export const conversasUsuarioFetch = () => {
+    const { currentUser } = firebase.auth()
+
+    return dispatch => {
+        let usuarioEmailB64 = b64.encode(currentUser.email);
+        
+        firebase.database().ref(`/usuario_conversas/${usuarioEmailB64}`)
+        .on('value', snapshot => {
+            dispatch({
+                type: LISTA_CONVERSAS_USUARIO,
+                payload: snapshot.val()
+            })
         })
     }
 }
